@@ -24,10 +24,10 @@ def cut_sent(para):
 
 
 def calc_weight(triple, s):
-    relation_vocabulary = "著名景点"
+    relation_vocabulary = "景点|位置|位于|在|位在"
     weight = 1
     # Ma
-    if re.search(triple[0], s):
+    if re.search(triple[2], s):
         weight *= 2
     # Mb
     if re.search(relation_vocabulary, s):
@@ -35,7 +35,7 @@ def calc_weight(triple, s):
     else:
         weight *= 2
     # Mc
-    if re.search(triple[2], s):
+    if re.search(triple[0], s):
         weight *= 1
     else:
         weight = 0
@@ -67,8 +67,10 @@ def choose_candidate():
 
         # read each triple and get its related candidate sentence
         for j in jsondata:
-            if j['relation'] != 'at' and (j['sub_type'] != "地点" or j['sub_type'] != "城市") and (j['obj_type'] != "地点" or j['obj_type'] != "城市"):
-                continue # we only need 地点 or 城市 at 地点 or 城市, cuz 著名景点，位置 only matches 'at' relation
+            sub_flag = re.search("地点|城市|景点", j['sub_type'])
+            obj_flag = re.search("地点|城市|景点", j['obj_type'])
+            if j['relation'] != 'at' or not sub_flag or not obj_flag:
+                continue # we only need 地点 or 城市 景点 at 地点 or 城市, cuz 著名景点，位置 only matches 'at' relation
             triple = (j['subject'], j['relation'], j['object'])
             biggest_weight = 1
             candidate = sentences[0]

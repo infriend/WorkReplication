@@ -23,23 +23,28 @@ def cut_sent(para):
     return para.split("\n")
 
 
+# In our 'at' relation, the first entity is object, the second one is subject.
 def calc_weight(triple, s):
     relation_vocabulary = "景点|位置|位于|在|位在"
     weight = 1
     # Ma
-    if re.search(triple[2], s):
+    ma = re.search(triple[2], s)
+    if ma:
         weight *= 2
+        s = s[:ma.span()[0]] + 'f' + s[ma.span()[0]:ma.span()[1]+1] + 'f' + s[ma.span()[1]+1:]
     # Mb
     if re.search(relation_vocabulary, s):
         weight *= 3
     else:
         weight *= 2
     # Mc
-    if re.search(triple[0], s):
+    mc = re.search(triple[0], s)
+    if mc:
         weight *= 1
+        s = s[:mc.span()[0]] + 'f' + s[mc.span()[0]:mc.span()[1] + 1] + 'f' + s[mc.span()[1] + 1:]
     else:
         weight = 0
-    return weight
+    return [weight, s]
 
 
 def choose_candidate():
@@ -77,7 +82,9 @@ def choose_candidate():
 
             # calculate the weight, choose the candidate sentence
             for s in sentences:
-                weight = calc_weight(triple, s)
+                res = calc_weight(triple, s)
+                weight = res[0]
+                s = res[1]
                 if weight > biggest_weight:
                     biggest_weight = weight
                     candidate = s

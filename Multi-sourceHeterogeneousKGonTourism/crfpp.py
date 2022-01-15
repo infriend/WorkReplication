@@ -1,11 +1,13 @@
 import os
 
 
+
+
 def train():
-    command = "crfpplearn "
+    command = "crf_learn "
     os.system(command)
 
 
 def test():
-    command = "crfpptest"
+    command = "crf_test"
     os.system(command)

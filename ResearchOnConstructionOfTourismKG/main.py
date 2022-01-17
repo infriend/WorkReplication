@@ -1,7 +1,15 @@
-# This is a sample Python script.
+"""
+First, get eneities from hudong wikipedia, get info box to construct raw triples.(we have triples)
+Second, ltp processes the text data for word segmentation and any other processes.
+For pattern match, we maintain a vocabulary and synonym as patterns to match the potential attribute value.
+For labeling, we label the candidate attribute and its part of speech.
+For machine learning, we train several classifiers, vote for the final result.
+For searching engine, search the entity, attribute to get the value.# html label changed, we cannot directly get values.
+For word field, give words a weight, get all the field words in the sentence and calculate the weights to
+choose the candidate.
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+We extract 地址 and 著名景点 in this paper, for it's the same attribute we need in our KG.
+"""
 
 
 def print_hi(name):

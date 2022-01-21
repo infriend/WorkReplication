@@ -9,6 +9,8 @@ For word field, give words a weight, get all the field words in the sentence and
 choose the candidate.
 
 We extract 地址 and 著名景点 in this paper, for it's the same attribute we need in our KG.
+
+Test: we know the text and its corresponding city/entity, we predict the triple.
 """
 
 

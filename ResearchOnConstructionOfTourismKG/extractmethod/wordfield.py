@@ -1,8 +1,7 @@
-import os
-import json
+from dataprocess import readdata
 import re
 """
-Read the triples, get the relation and its synonyms, values(first entity) into the field,
+Read the triples, put the relation and its synonyms, values(first entity) into the field,
 values have special ways to calculate weight.
 """
 
@@ -19,30 +18,6 @@ def is_chinese(ch):
     return False
 
 
-def read_triples():
-    tripleFiles = os.listdir(tripleDataPath)
-
-    triples = []
-
-    for i in range(len(tripleFiles)):
-        with open(tripleDataPath + tripleFiles[i], 'r') as f:
-            text = f.read()
-            f.close()
-
-            # read the corresponding json data
-            jsondata = json.loads(text)
-
-        for j in jsondata:
-            sub_flag = re.search("地点|城市|景点", j['sub_type'])
-            obj_flag = re.search("地点|城市|景点", j['obj_type'])
-            if j['relation'] != 'at' or not sub_flag or not obj_flag:
-                continue  # we only need 地点 or 城市 景点 at 地点 or 城市, cuz 著名景点，位置 only matches 'at' relation
-            triple = (j['subject'], j['relation'], j['object'])
-            triples.append(triple)
-
-    return triples
-
-
 def construct_wordfield():
     """
     Input: triples, synonyms.
@@ -50,16 +25,17 @@ def construct_wordfield():
     """
     F = {}
 
-    triples = read_triples()
+    triples = readdata.read_triple()
 
-    for t in triples:
-        if t[0] not in F:
-            if re.search("[0-9]", t[0]):
-                F.update({t[0], 0.5})
-            elif len(t[0]) == 1 and is_chinese(t[0]):
-                F.update({t[0], 1})
-            else:
-                F.update({t[0], 2})
+    for city in triples:
+        for t in city:
+            if t[0] not in F:
+                if re.search("[0-9]", t[0]):
+                    F.update({t[0], 0.5})
+                elif len(t[0]) == 1 and is_chinese(t[0]):
+                    F.update({t[0], 1})
+                else:
+                    F.update({t[0], 2})
 
     with open(synonymsPath, 'r') as f:
         text = f.read()

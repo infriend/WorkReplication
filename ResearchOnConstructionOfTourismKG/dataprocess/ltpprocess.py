@@ -1,6 +1,6 @@
 from ltp import LTP
 import re
-import os
+from dataprocess import readdata
 
 """
 First, sentence segmentation. Then for each sentence, we do word segmentation.
@@ -9,6 +9,7 @@ Then we label the part of speech.
 
 textDataPath = "./data/contextdata/"
 tripleDataPath = "./data/tripledata/"
+
 
 # sentence segmentation
 def cut_sent(para):
@@ -22,24 +23,20 @@ def cut_sent(para):
     return para.split("\n")
 
 
-def get_segmentedsentences():
-    textFiles = os.listdir(textDataPath)
-
-    sentences = []
-
-    for i in range(len(textFiles)):
-        with open(textDataPath + textFiles[i], "r") as f:
-            text = f.read()
-            f.close()
-            text = text.replace("\n", '').replace("\r", '')
-
-            # get all the sentences
-            sentences = cut_sent(text)
+def get_segmentedsentences(status):
+    text = readdata.read_texts(status)
+    # get all the sentences
+    sentences = cut_sent(text)
 
     return sentences
 
 
 def ltp_process(sentences):
+    """
+    Input a group of sentences, return segs and poses.
+    :param sentences: sentences from one text
+    :return: the text's segs and poses, each list represents results of a sentences.
+    """
     ltp = LTP()
 
     seg_list = []
@@ -48,11 +45,27 @@ def ltp_process(sentences):
     for s in sentences:
         seg, hidden = ltp.seg([s])
         pos = ltp.pos(hidden)
-        seg_list.append(seg)
-        pos_list.append(pos)
+
+        # if the current token is the same of the last one, combine it. if different insert into the list.
+        i = 1
+        length = len(pos)
+        lastSeg = seg[0][0]
+        lastPos = pos[0][0]
+        final_posList = []
+        final_segList = []
+        while i < length:
+            if pos[0][i] == lastPos:
+                lastSeg += seg[0][i]
+            else:
+                final_segList.append(lastSeg)
+                final_posList.append(lastPos)
+                lastSeg = seg[0][i]
+                lastPos = pos[0][i]
+            i += 1
+        final_segList.append(lastSeg)
+        final_posList.append(lastPos)
+
+        seg_list.append(final_segList)
+        pos_list.append(final_posList)
 
     return seg_list, pos_list
-
-
-print("aa")
-

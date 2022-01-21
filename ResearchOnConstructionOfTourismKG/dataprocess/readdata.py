@@ -11,6 +11,7 @@ import re
 
 textDataPath = "./data/content_list/"
 tripleDataPath = "./data/tripledata/"
+semanticDatapath = "./data/semantic_list/"
 trainlist = []
 trainentitylist = []
 testlist = []
@@ -85,8 +86,17 @@ def text_jsonprocess(textnum):
 
     return text
 
+
 def triple_jsonprocess(triplenum):
+
     triples = []
+
+    with open(semanticDatapath + triplenum, 'r') as f:
+        text = f.read()
+        f.close()
+
+        semanticData = json.loads(text)
+
     with open(tripleDataPath + triplenum, 'r') as f:
         text = f.read()
         f.close()
@@ -100,6 +110,18 @@ def triple_jsonprocess(triplenum):
         if j['relation'] != 'at' or not sub_flag or not obj_flag:
             continue  # we only need 地点 or 城市 景点 at 地点 or 城市, cuz 著名景点，位置 only matches 'at' relation
         triple = (j['subject'], j['relation'], j['object'])
+
+        # get the corresponding sentence from semantic data
+        if j['sub_id'] != "NotFound":
+            position = j['sub_id'].replace('(','').replace(')','').replace('\'', '')
+            position = position.split(',')
+            sentence = semanticData['"'+position[0]+'"']['"'+position[1]+'"'][int(position[2])]["source"][int(position[3])]
+
+        if j['obj_id'] != "NotFound":
+            position = j['obj_id'].replace('(', '').replace(')', '').replace('\'', '')
+            position = position.split(',')
+            sentence = semanticData['"' + position[0] + '"']['"' + position[1] + '"'][int(position[2])]["source"][int(position[3])]
+
+
         triples.append(triple)
     return triples
-

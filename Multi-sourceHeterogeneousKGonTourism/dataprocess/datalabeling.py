@@ -1,4 +1,6 @@
 import re
+import wordseg
+import candidate
 
 """
 In this module, we need to construct template files and labeling the data with BNI.
@@ -22,18 +24,16 @@ def data_labeling(triples, generators):
     # get the sentence
     for i in range(len(generators)):
         sentence = ''
+        f_flag = 0
         for w in generators[i]:
-            f_flag = 0
-
-            if w == 'f/x':
+            if w.word == '↑':
                 if f_flag == 0:
                     f_flag = 1
                 else:
                     f_flag = 0
                 continue
 
-
-            split_word = w.split("/")
+            split_word = [w.word, w.flag]
             # label as b, m, e, s
             if f_flag == 1:
                 word_length = len(split_word[0])
@@ -43,18 +43,22 @@ def data_labeling(triples, generators):
                     else:
                         if j == 0:
                             sentence += split_word[0][j] + ' ' + split_word[1] + ' ' + 'B' + '\n'
-                        elif j == word_length-1:
+                        elif j == word_length - 1:
                             sentence += split_word[0][j] + ' ' + split_word[1] + ' ' + 'E' + '\n'
                         else:
                             sentence += split_word[0][j] + ' ' + split_word[1] + ' ' + 'M' + '\n'
             # label as n
             else:
                 for c in split_word[0]:
-                    word_length = len(split_word[0])
-                    for j in range(word_length):
-                        sentence += split_word[0][j] + ' ' + split_word[1] + ' ' + 'N' + '\n'
+                    sentence += c + ' ' + split_word[1] + ' ' + 'N' + '\n'
+
         sentences += sentence
         sentences += '\n'
 
     return sentences
 
+
+triples, candidates = candidate.choose_candidate()
+generators = wordseg.word_segmentation(candidates)
+sentences = data_labeling(triples, generators)
+print("A")

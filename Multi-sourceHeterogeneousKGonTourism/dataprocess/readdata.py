@@ -9,9 +9,9 @@ import os
 import json
 import re
 
-textDataPath = "./data/content_list/"
-semanticDatapath = "./data/semantic_list/"
-trainDataPath = "./data/trainingdata/"
+textDataPath = "../data/content_list/"
+semanticDatapath = "../data/semantic_list/"
+trainDataPath = "../data/trainingdata/"
 trainlist = []
 trainentitylist = []
 testlist = []
@@ -19,7 +19,7 @@ testentitylist = []
 traintripledict = {}
 testtripledict = {}
 print(os.getcwd())
-with open("./data/youji_train_list.txt", "r") as f:
+with open("../data/youji_train_list.txt", "r") as f:
     text = f.read()
     f.close()
     templist = text.split('\n')
@@ -27,7 +27,7 @@ with open("./data/youji_train_list.txt", "r") as f:
         trainlist.append(t)
         traintripledict.update({t: []})
 
-with open("./data/youji_test_list.txt", "r") as f:
+with open("../data/youji_test_list.txt", "r") as f:
     text = f.read()
     f.close()
     templist = text.split('\n')
@@ -106,14 +106,14 @@ def triple_jsonprocess(status):
     global testtripledict
 
     if status == "train":
-        with open("./data/trainingdata/youji_train" + ".json", "r") as f:
+        with open("../data/trainingdata/youji_train" + ".json", "r") as f:
             text = f.read()
             f.close()
 
             # read the corresponding json data
             jsondata = json.loads(text)
     else:
-        with open("./data/testdata/youji_test" + ".json", "r") as f:
+        with open("../data/testdata/youji_test" + ".json", "r") as f:
             text = f.read()
             f.close()
 

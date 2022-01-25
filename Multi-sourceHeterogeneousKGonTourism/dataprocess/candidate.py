@@ -23,36 +23,84 @@ def cut_sent(para):
     return para.split("\n")
 
 
+def merge_intervals(intervals):
+
+    intervals.sort(key=lambda x: x[0])
+
+    merged = []
+    for interval in intervals:
+        # 如果列表为空，或者当前区间与上一区间不重合，直接添加
+        if not merged or merged[-1][1] < interval[0]:
+            merged.append(interval)
+        else:
+            # 否则的话，我们就可以与上一区间进行合并
+            merged[-1][1] = max(merged[-1][1], interval[1])
+
+    return merged
+
+
 # In our 'at' relation, the first entity is object, the second one is subject.
 def calc_weight(triple, s):
     relation_vocabulary = "景点|位置|位于|在|位在"
     weight = 1
+
+    intersection = []
+    tempsentence = ""
+
     # Ma
-    ma = re.search(triple[2], s)
-    if ma:
+    ma_gen = re.finditer(triple[2], s)
+    mb = re.search(relation_vocabulary, s)
+    mc_gen = re.finditer(triple[0], s)
+    try:
+        ma = next(ma_gen)
+    except StopIteration:
+        pass
+    else:
         weight *= 2
-        s = s[:ma.span()[0]] + 'f' + s[ma.span()[0]:ma.span()[1]+1] + 'f' + s[ma.span()[1]+1:]
+        span = [ma.span()[0], ma.span()[1]]
+        intersection.append(span)
+        for ma in ma_gen:
+            span = [ma.span()[0], ma.span()[1]]
+            intersection.append(span)
+
     # Mb
-    if re.search(relation_vocabulary, s):
+    if mb:
         weight *= 3
     else:
         weight *= 2
+
     # Mc
-    mc = re.search(triple[0], s)
-    if mc:
-        weight *= 1
-        s = s[:mc.span()[0]] + 'f' + s[mc.span()[0]:mc.span()[1] + 1] + 'f' + s[mc.span()[1] + 1:]
-    else:
+    mc_gen = re.finditer(triple[0], s)
+    try:
+        mc = next(mc_gen)
+    except StopIteration:
         weight = 0
+    else:
+        weight *= 1
+        span = [mc.span()[0], mc.span()[1]]
+        intersection.append(span)
+        for mc in mc_gen:
+            span = [mc.span()[0], mc.span()[1]]
+            intersection.append(span)
+
+    intersection = merge_intervals(intersection)
+    drift = 0
+    for i in intersection:
+        s = s[:i[0]+drift] + '↑' + s[i[0]+drift:i[1]+drift] + '↑' + s[i[1]+drift:]
+        drift += 2
+
     return [weight, s]
 
 
 def choose_candidate():
+    tripleRes = []
+    candidatesRes = []
+
     triples = []
     candidates = []
 
     trainlist = []
-    with open("./data/youji_train_list.txt", "r") as f:
+    with open("../data/youji_train_list.txt", "r") as f:
         text = f.read()
         f.close()
         templist = text.split('\n')
@@ -91,5 +139,3 @@ def choose_candidate():
 
     return triples, candidates
 
-
-triples, candidates = choose_candidate()

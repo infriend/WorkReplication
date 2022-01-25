@@ -1,8 +1,6 @@
 import jieba
 import jieba.posseg
 
-import candidate
-
 """
 Chinese word segmentation, along with part of speech labeling
 """

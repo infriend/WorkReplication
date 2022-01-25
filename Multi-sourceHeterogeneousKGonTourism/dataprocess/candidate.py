@@ -1,7 +1,7 @@
 import re
 import os
 import json
-
+import readdata
 '''
 split data with dot, then for each sentence, match the entity, attribute and value,
 calculate the weight. each triple has one candidate sentence.
@@ -11,7 +11,7 @@ data set is organized with triples and their corresponding articles.
 textDataPath = "./data/contextdata/"
 tripleDataPath = "./data/tripledata/"
 
-
+# sentence segmentation
 def cut_sent(para):
     para = re.sub('([。！？\?])([^”’])', r"\1\n\2", para)  # 单字符断句符
     para = re.sub('(\.{6})([^”’])', r"\1\n\2", para)  # 英文省略号
@@ -51,38 +51,35 @@ def choose_candidate():
     triples = []
     candidates = []
 
-    tripleFiles = os.listdir(tripleDataPath)
-    textFiles = os.listdir(textDataPath)
+    trainlist = []
+    with open("./data/youji_train_list.txt", "r") as f:
+        text = f.read()
+        f.close()
+        templist = text.split('\n')
+        for t in templist:
+            trainlist.append(t)
 
-    for i in range(len(tripleFiles)):
-        with open(textDataPath + textFiles[i], "r") as f:
-            text = f.read()
-            f.close()
-            text = text.replace("\n", '').replace("\r", '')
+    text_dict = readdata.read_texts("train")
+    tripledict = readdata.read_triple("train")
 
-            # get all the sentences
-            sentences = cut_sent(text)
+    # for every text
+    for k in text_dict:
 
-        with open(tripleDataPath + tripleFiles[i], 'r') as f:
-            text = f.read()
-            f.close()
+        text = text_dict[k]
 
-            # read the corresponding json data
-            jsondata = json.loads(text)
+        # get all the sentences
+        sentences = cut_sent(text)
+
+        ts = tripledict[k]
 
         # read each triple and get its related candidate sentence
-        for j in jsondata:
-            sub_flag = re.search("地点|城市|景点", j['sub_type'])
-            obj_flag = re.search("地点|城市|景点", j['obj_type'])
-            if j['relation'] != 'at' or not sub_flag or not obj_flag:
-                continue # we only need 地点 or 城市 景点 at 地点 or 城市, cuz 著名景点，位置 only matches 'at' relation
-            triple = (j['subject'], j['relation'], j['object'])
+        for j in ts:
             biggest_weight = 1
             candidate = sentences[0]
 
             # calculate the weight, choose the candidate sentence
             for s in sentences:
-                res = calc_weight(triple, s)
+                res = calc_weight(j, s)
                 weight = res[0]
                 s = res[1]
                 if weight > biggest_weight:
@@ -90,9 +87,9 @@ def choose_candidate():
                     candidate = s
 
             candidates.append(candidate)
-            triples.append(triple)
+            triples.append(j)
 
-    return [triples, candidates]
+    return triples, candidates
 
 
-choose_candidate()
+triples, candidates = choose_candidate()

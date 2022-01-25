@@ -58,6 +58,3 @@ def data_labeling(triples, generators):
 
     return sentences
 
-
-def template_generator():
-    print("aa")

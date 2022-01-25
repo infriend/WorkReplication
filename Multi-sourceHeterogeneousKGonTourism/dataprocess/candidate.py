@@ -45,23 +45,14 @@ def calc_weight(triple, s):
     weight = 1
 
     intersection = []
-    tempsentence = ""
 
     # Ma
-    ma_gen = re.finditer(triple[2], s)
+    ma = re.search(triple[2], s)
     mb = re.search(relation_vocabulary, s)
-    mc_gen = re.finditer(triple[0], s)
-    try:
-        ma = next(ma_gen)
-    except StopIteration:
-        pass
-    else:
+    mc = re.search(triple[0], s)
+
+    if ma:
         weight *= 2
-        span = [ma.span()[0], ma.span()[1]]
-        intersection.append(span)
-        for ma in ma_gen:
-            span = [ma.span()[0], ma.span()[1]]
-            intersection.append(span)
 
     # Mb
     if mb:
@@ -70,24 +61,10 @@ def calc_weight(triple, s):
         weight *= 2
 
     # Mc
-    mc_gen = re.finditer(triple[0], s)
-    try:
-        mc = next(mc_gen)
-    except StopIteration:
-        weight = 0
-    else:
+    if mc:
         weight *= 1
-        span = [mc.span()[0], mc.span()[1]]
-        intersection.append(span)
-        for mc in mc_gen:
-            span = [mc.span()[0], mc.span()[1]]
-            intersection.append(span)
-
-    intersection = merge_intervals(intersection)
-    drift = 0
-    for i in intersection:
-        s = s[:i[0]+drift] + '↑' + s[i[0]+drift:i[1]+drift] + '↑' + s[i[1]+drift:]
-        drift += 2
+    else:
+        weight *= 0
 
     return [weight, s]
 
@@ -95,9 +72,6 @@ def calc_weight(triple, s):
 def choose_candidate():
     tripleRes = []
     candidatesRes = []
-
-    triples = []
-    candidates = []
 
     trainlist = []
     with open("../data/youji_train_list.txt", "r") as f:
@@ -118,10 +92,16 @@ def choose_candidate():
         # get all the sentences
         sentences = cut_sent(text)
 
-        ts = tripledict[k]
+        ts = tripledict[k]  # corresponding triples
+        attributes = set()  # all attributes in the triples
+        candidates = []  # save all the candidates
 
         # read each triple and get its related candidate sentence
         for j in ts:
+            # get all the attribute values
+            attributes.add(j[0])
+            attributes.add(j[2])
+
             biggest_weight = 1
             candidate = sentences[0]
 
@@ -134,8 +114,49 @@ def choose_candidate():
                     biggest_weight = weight
                     candidate = s
 
-            candidates.append(candidate)
-            triples.append(j)
+            candidates.append(candidate)  # all candidates in one text
+            tripleRes.append(j)
 
-    return triples, candidates
+        # remove duplicate candidate, label all the entities in the candidates
+        candidates = set(candidates)
+
+        # for one sentence
+        for candidate in candidates:
+            intersection = []
+
+            for attr in attributes:
+                ma_gen = re.finditer(attr, candidate)
+
+                try:
+                    ma = next(ma_gen)
+                except StopIteration:
+                    pass
+                else:
+                    span = [ma.span()[0], ma.span()[1]]
+                    intersection.append(span)
+                    for ma in ma_gen:
+                        span = [ma.span()[0], ma.span()[1]]
+                        intersection.append(span)
+
+                mc_gen = re.finditer(attr, candidate)
+
+                try:
+                    mc = next(mc_gen)
+                except StopIteration:
+                    pass
+                else:
+                    span = [mc.span()[0], mc.span()[1]]
+                    intersection.append(span)
+                    for mc in mc_gen:
+                        span = [mc.span()[0], mc.span()[1]]
+                        intersection.append(span)
+
+            intersection = merge_intervals(intersection)
+            drift = 0
+            for i in intersection:
+                candidate = candidate[:i[0] + drift] + '↑' + candidate[i[0] + drift:i[1] + drift] + '↑' + candidate[i[1] + drift:]
+                drift += 2
+            candidatesRes.append(candidate)
+
+    return tripleRes, candidatesRes
 

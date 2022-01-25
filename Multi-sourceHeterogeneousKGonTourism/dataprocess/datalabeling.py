@@ -14,12 +14,6 @@ tripleDataPath = "./data/tripledata/"
 
 
 def data_labeling(triples, generators):
-    # get all the attribute values
-    attributes = set()
-    for t in triples:
-        attributes.add(t[0])
-        attributes.add(t[2])
-
     sentences = ''
     # get the sentence
     for i in range(len(generators)):
@@ -61,4 +55,6 @@ def data_labeling(triples, generators):
 triples, candidates = candidate.choose_candidate()
 generators = wordseg.word_segmentation(candidates)
 sentences = data_labeling(triples, generators)
-print("A")
+with open("../data/trainingdata/train.txt", 'a') as f:
+    f.write(sentences)
+    f.close()

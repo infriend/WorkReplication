@@ -13,8 +13,4 @@ def crftest():
     return info
 
 
-test_res = crftest()
-with open("./data/testdata/test_res.txt", 'a') as f:
-    for string in test_res:
-        f.write(string)
-    f.close()
+

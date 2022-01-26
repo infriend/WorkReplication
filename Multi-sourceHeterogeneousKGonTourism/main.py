@@ -15,6 +15,9 @@ def test():
     texts, testentitydict = dataprocess.readdata.read_texts("test")
     test_text = ''
 
+    values = set()
+    relations = set()
+    word = ''
     # for each text we have one test data
     for i in list(texts):
         sentences = dataprocess.candidate.cut_sent(texts[i])
@@ -28,17 +31,47 @@ def test():
             test_text += sentence
             test_text += '\n'
 
+        test_res = crfpp.crftest()
+
+        for line in test_res:
+            if line == '\n':
+                continue
+            if line[-2] == 'S':
+                values.add(line[0] + '\n')
+                relations.add(line[0] + ' ' + 'at' + ' ' + testentitydict[i] + '\n')
+            elif line[-2] == 'B' or line[-2] == 'M':
+                word += line[0]
+            elif line[-2] == 'E':
+                word += line[0]
+                values.add(word + '\n')
+                relations.add(word + ' ' + 'at' + ' ' + testentitydict[i] + '\n')
+                word = ''
+            else:
+                pass
+
+        print(testentitydict[i])
+
+    with open("./data/testdata/entity.txt", 'a+') as f:
+        for every in iter(values):
+            f.write(every)
+        f.close()
+
+    with open("./data/testdata/relation.txt", 'a+') as f:
+        for every in iter(relations):
+            f.write(every)
+        f.close()
+
+"""
     with open("./data/testdata/test.txt", 'a+') as f:
         f.write(test_text)
         f.close()
 
     test_res = crfpp.crftest()
-
-    with open("./data/testdata/test.res", 'a') as f:
-        f.write(test_res)
+    with open("./data/testdata/test_res.txt", 'a') as f:
+        for string in test_res:
+            f.write(string)
         f.close()
-
+"""
 
 if __name__ == '__main__':
     test()
-

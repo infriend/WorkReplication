@@ -1,6 +1,6 @@
 import re
-import wordseg
-import candidate
+"""import wordseg
+import candidate"""
 
 """
 In this module, we need to construct template files and labeling the data with BNI.
@@ -13,7 +13,7 @@ trainingDataPath = "./data/trainingdata/"
 tripleDataPath = "./data/tripledata/"
 
 
-def data_labeling(triples, generators):
+def data_labeling(generators):
     sentences = ''
     # get the sentence
     for i in range(len(generators)):
@@ -52,9 +52,9 @@ def data_labeling(triples, generators):
     return sentences
 
 
-triples, candidates = candidate.choose_candidate()
+"""triples, candidates = candidate.choose_candidate()
 generators = wordseg.word_segmentation(candidates)
 sentences = data_labeling(triples, generators)
 with open("../data/trainingdata/train.txt", 'a') as f:
     f.write(sentences)
-    f.close()
+    f.close()"""

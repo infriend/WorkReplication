@@ -9,17 +9,17 @@ import os
 import json
 import re
 
-textDataPath = "../data/content_list/"
-semanticDatapath = "../data/semantic_list/"
+textDataPath = "./data/content_list/"
+semanticDatapath = "./data/semantic_list/"
 trainDataPath = "../data/trainingdata/"
 trainlist = []
 trainentitylist = []
 testlist = []
-testentitylist = []
+testentitydict = {}
 traintripledict = {}
 testtripledict = {}
 print(os.getcwd())
-with open("../data/youji_train_list.txt", "r") as f:
+with open("./data/youji_train_list.txt", "r") as f:
     text = f.read()
     f.close()
     templist = text.split('\n')
@@ -27,14 +27,14 @@ with open("../data/youji_train_list.txt", "r") as f:
         trainlist.append(t)
         traintripledict.update({t: []})
 
-with open("../data/youji_test_list.txt", "r") as f:
+with open("./data/youji_test_list.txt", "r") as f:
     text = f.read()
     f.close()
     templist = text.split('\n')
     for t in templist:
         temp = t.split(' ')
         testlist.append(temp[0])
-        testentitylist.append(temp[1])
+        testentitydict.update({temp[0]: temp[1]})
         testtripledict.update({t: []})
 
 
@@ -72,7 +72,7 @@ def read_texts(status):
             text = text_jsonprocess(testtext)
             texts.update({testtext: text})
 
-        return texts, testentitylist
+        return texts, testentitydict
 
 
 def text_jsonprocess(textnum):

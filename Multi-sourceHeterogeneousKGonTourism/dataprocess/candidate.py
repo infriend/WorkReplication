@@ -1,7 +1,7 @@
 import re
 import os
 import json
-import readdata
+import dataprocess.readdata
 '''
 split data with dot, then for each sentence, match the entity, attribute and value,
 calculate the weight. each triple has one candidate sentence.
@@ -81,8 +81,8 @@ def choose_candidate():
         for t in templist:
             trainlist.append(t)
 
-    text_dict = readdata.read_texts("train")
-    tripledict = readdata.read_triple("train")
+    text_dict = dataprocess.readdata.read_texts("train")
+    tripledict = dataprocess.readdata.read_triple("train")
 
     # for every text
     for k in text_dict:

@@ -7,23 +7,24 @@ Entity:["entity0", "entity1", ...]
 """
 import json
 import re
+import dataprocess.ltpprocess
 
-textDataPath = "./data/content_list/"
-semanticDatapath = "./data/semantic_list/"
-trainDataPath = "./data/trainingdata/"
+textDataPath = "../data/content_list/"
+semanticDatapath = "../data/semantic_list/"
+trainDataPath = "../data/trainingdata/"
 trainlist = []
 trainentitylist = []
 testlist = []
 testentitylist = []
 testentitydict = {}
-with open("./youji_train_list.txt", "r") as f:
+with open("../data/youji_train_list.txt", "r") as f:
     text = f.read()
     f.close()
     templist = text.split('\n')
     for t in templist:
         trainlist.append(t)
 
-with open("./youji_test_list.txt", "r") as f:
+with open("../data/youji_test_list.txt", "r") as f:
     text = f.read()
     f.close()
     templist = text.split('\n')
@@ -31,10 +32,10 @@ with open("./youji_test_list.txt", "r") as f:
         temp = t.split(' ')
         testlist.append(temp[0])
         testentitylist.append(temp[1])
+        testentitydict.update({temp[0]: temp[1]})
 
 
 def read_triple(status):
-    triples = []
     if status == "train":
         # get train dict, {id: [triples]}
         triples = triple_jsonprocess("train")
@@ -43,8 +44,6 @@ def read_triple(status):
         # get test dict
         triples = triple_jsonprocess("test")
 
-
-
     return triples
 
 
@@ -52,7 +51,7 @@ def read_texts(status):
     """
     If data for training, input "train", else "test"
     :param status: "train" or "test"
-    :return: texts, entitylist
+    :return: texts, a dict with {id: text}, entitylist {id: entity}
     """
 
     texts = {}
@@ -107,14 +106,14 @@ def triple_jsonprocess(status):
     sentences = []
 
     if status == "train":
-        with open("./data/trainingdata/youji_train" + ".json", "r") as f:
+        with open("../data/trainingdata/youji_train" + ".json", "r") as f:
             text = f.read()
             f.close()
 
             # read the corresponding json data
             jsondata = json.loads(text)
     else:
-        with open("./data/testdata/youji_test" + ".json", "r") as f:
+        with open("../data/testdata/youji_test" + ".json", "r") as f:
             text = f.read()
             f.close()
 
@@ -157,6 +156,35 @@ def triple_jsonprocess(status):
         # with the same index
         sentences.append(tempsentence)
         triples.append(triple)
+
     return triples
 
 
+def get_allns(status):
+    if status == 'train':
+        texts = read_texts(status)
+    else:
+        texts, testentities = read_texts(status)
+    ns_sentences = {}
+    ns_poses = {}
+    for id in texts:
+        print("Get all ns: text %s" % id)
+        selected_sentences = []
+        selected_poses = []
+        text = texts[id]
+        sentences = dataprocess.ltpprocess.cut_sent(text)
+        print("Sentence number: %d" %(len(sentences)))
+        seg_list, pos_list = dataprocess.ltpprocess.ltp_process(sentences)
+        # for each sentence
+        for i in range(len(seg_list)):
+
+            # for each word's pos
+            for j in range(len(seg_list[i])):
+                if pos_list[i][j] == 'ns':
+                    selected_sentences.append(seg_list[i])
+                    selected_poses.append(pos_list[i])
+                    break
+        ns_sentences.update({id: selected_sentences})
+        ns_poses.update({id: selected_poses})
+
+    return ns_sentences, ns_poses

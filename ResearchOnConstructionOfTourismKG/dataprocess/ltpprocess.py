@@ -23,19 +23,11 @@ def cut_sent(para):
     return para.split("\n")
 
 
-def get_segmentedsentences(status):
-    text = readdata.read_texts(status)
-    # get all the sentences
-    sentences = cut_sent(text)
-
-    return sentences
-
-
 def ltp_process(sentences):
     """
     Input a group of sentences(list), return segs and poses.
     :param sentences: sentences from one text
-    :return: the text's segs and poses, each list represents results of a sentences.
+    :return: the text's segs and poses, list with lists, each child list represents results of a sentences.
     """
     ltp = LTP()
 
@@ -48,7 +40,7 @@ def ltp_process(sentences):
 
         # if the current token is the same of the last one, combine it. if different insert into the list.
         i = 1
-        length = len(pos)
+        length = len(pos[0])
         lastSeg = seg[0][0]
         lastPos = pos[0][0]
         final_posList = []

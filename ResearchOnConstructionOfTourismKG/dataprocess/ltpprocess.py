@@ -33,7 +33,7 @@ def get_segmentedsentences(status):
 
 def ltp_process(sentences):
     """
-    Input a group of sentences, return segs and poses.
+    Input a group of sentences(list), return segs and poses.
     :param sentences: sentences from one text
     :return: the text's segs and poses, each list represents results of a sentences.
     """

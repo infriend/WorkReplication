@@ -37,10 +37,11 @@ def read_triple(status):
     triples = []
     if status == "train":
         # get train dict, {id: [triples]}
-        triples = triple_jsonprocess()
+        triples = triple_jsonprocess("train")
 
     else:
         # get test dict
+        triples = triple_jsonprocess("test")
 
 
 
@@ -157,3 +158,5 @@ def triple_jsonprocess(status):
         sentences.append(tempsentence)
         triples.append(triple)
     return triples
+
+

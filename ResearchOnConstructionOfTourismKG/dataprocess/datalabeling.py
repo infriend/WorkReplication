@@ -5,6 +5,7 @@ import numpy as np
 import dataprocess.readdata
 import dataprocess.ltpprocess
 import re
+import copy
 
 def datalabeling():
     """
@@ -14,15 +15,21 @@ def datalabeling():
     all_ns_sentences = np.load("./all_ns_sentences.npy", allow_pickle=True).item()
     all_pos = np.load("./all_ns_poses.npy", allow_pickle=True).item()
     triples_dict, triple_sentences = dataprocess.readdata.read_triple("train")
-    totalnum = 0
-    posnum = 0
+
+    combinedSentence = {}
+    combinedPoses = {}
+
     X_Sentences = {}
+    X_Poses = {}
     Y_label = {}
 
     for index in triples_dict:
         print("Text %d" % index)
         entities = []
         X_Sentences.update({index: []})
+        X_Poses.update({index: []})
+        combinedSentence.update({index: []})
+        combinedPoses.update({index: []})
         Y_label.update({index: []})
         sentences_segs = all_ns_sentences[str(index)]
         sentences_pos = all_pos[str(index)]
@@ -33,39 +40,53 @@ def datalabeling():
 
         entities = set(entities)
 
-        # combine the ns word, search the entity in the long ns word, if find, set positive, save the long ns word.
+        # combine the ns word, save the long ns word.
         for sid in range(len(sentences_segs)):
-            temp_sentence = ''
+            # A new sentence
+            combinedSentence[index].append([])
+            combinedPoses[index].append([])
+
             ns_word = ''
             positivetime = 0
             negtivetime = 0
             ns_wordlist = []
             for wid in range(len(sentences_segs[sid])):
-
                 if sentences_pos[sid][wid] != 'ns':
-                    temp_sentence += sentences_segs[sid][wid]
+                    combinedSentence[index][-1].append(sentences_segs[sid][wid])
+                    combinedPoses[index][-1].append(sentences_pos[sid][wid])
                     continue
 
+                # if ns, combine the word and pos
                 while wid < len(sentences_segs[sid]) and sentences_pos[sid][wid] == 'ns':
                     ns_word += sentences_segs[sid][wid]
                     wid += 1
                 wid -= 1
-                temp_sentence += ns_word
+
+                combinedSentence[index][-1].append(ns_word)
+                combinedPoses[index][-1].append('ns')
+
                 ns_wordlist.append(ns_word)
+                ns_word = ''
 
-                e_flag = 0
-                for e in entities:
-                    match = re.search(e, ns_word)
-                    if match:
-                        positivetime += 1
-                        Y_label[index].append(1)
-                        e_flag = 1
-                        break
-                if e_flag == 0:
-                    negtivetime += 1
-                    Y_label[index].append(0)
-
-            for i in range(positivetime+negtivetime):
-                X_Sentences[index].append([temp_sentence, ns_wordlist[i]])
+        # For each sentence, search the ns word, search the entity in the long ns word, if find, set positive.
+        for sid in range(len(combinedSentence[index])):
+            for wid in range(len(combinedSentence[index][sid])):
+                if combinedPoses[index][sid][wid] == 'ns':
+                    e_flag = 0
+                    X_Sentences[index].append(copy.deepcopy(combinedSentence[index][sid]))
+                    X_Sentences[index][-1][wid] = '↑' + combinedSentence[index][sid][wid] + '↑'
+                    X_Poses[index].append(combinedPoses[index][sid])
+                    for e in entities:
+                        match = re.search(e, combinedSentence[index][sid][wid])
+                        if match:
+                            positivetime += 1
+                            Y_label[index].append(1)
+                            e_flag = 1
+                            break
+                    if e_flag == 0:
+                        negtivetime += 1
+                        Y_label[index].append(0)
 
     return X_Sentences, Y_label
+
+datalabeling()

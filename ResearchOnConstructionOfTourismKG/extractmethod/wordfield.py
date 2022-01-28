@@ -20,12 +20,12 @@ def is_chinese(ch):
 
 def construct_wordfield():
     """
-    Input: triples, synonyms.
+    Input: triples(list, with all triples in it), synonyms(list, with all triggers).
     Output: word field F, a list.
     """
     F = {}
 
-    triples = readdata.read_triple()
+    triples, sentences = readdata.read_triple()
 
     for city in triples:
         for t in city:

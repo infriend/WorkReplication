@@ -38,13 +38,13 @@ with open("../data/youji_test_list.txt", "r") as f:
 def read_triple(status):
     if status == "train":
         # get train dict, {id: [triples]}
-        triples = triple_jsonprocess("train")
+        triples, sentences = triple_jsonprocess("train")
 
     else:
         # get test dict
-        triples = triple_jsonprocess("test")
+        triples, sentences = triple_jsonprocess("test")
 
-    return triples
+    return triples, sentences
 
 
 def read_texts(status):
@@ -96,7 +96,8 @@ def text_jsonprocess(textnum):
 def triple_jsonprocess(status):
     """
     Read triples first, then read the text from id, if id is different from the next triple, read new text.
-    :return:
+    Get all the triples and their corresponding sentence at the same time.
+    :return triples, sentences:
     """
     tripledict = {}
 
@@ -120,18 +121,21 @@ def triple_jsonprocess(status):
             # read the corresponding json data
             jsondata = json.loads(text)
 
-
+    # for each triple data
     for j in jsondata:
+        # we only need 地点 or 城市 景点 at 地点 or 城市, cuz 著名景点，位置 only matches 'at' relation
         sub_flag = re.search("地点|城市|景点", j['sub_type'])
         obj_flag = re.search("地点|城市|景点", j['obj_type'])
         if j['relation'] != 'at' or not sub_flag or not obj_flag:
-            continue  # we only need 地点 or 城市 景点 at 地点 or 城市, cuz 著名景点，位置 only matches 'at' relation
+            continue
+
+        # get the triple tuple
         triple = (j['subject'], j['relation'], j['object'])
 
         # read text
         if textid != j["id"]:
             textid = j["id"]
-            with open(semanticDatapath+textid+".json", 'r') as f:
+            with open(semanticDatapath+str(textid)+".json", 'r') as f:
                 text = f.read()
                 f.close()
                 semanticData = json.loads(text)
@@ -142,14 +146,14 @@ def triple_jsonprocess(status):
         if j['sub_id'] != "NotFound":
             position = j['sub_id'].replace('(', '').replace(')', '').replace('\'', '')
             position = position.split(',')
-            sentence0 = semanticData['"' + position[0] + '"']['"' + position[1] + '"'][int(position[2])]["source"][
+            sentence0 = semanticData[str(position[0])][str(position[1])][int(position[2])]["source"][
                 int(position[3])]
             tempsentence[0] = sentence0
 
         if j['obj_id'] != "NotFound":
             position = j['obj_id'].replace('(', '').replace(')', '').replace('\'', '')
             position = position.split(',')
-            sentence1 = semanticData['"' + position[0] + '"']['"' + position[1] + '"'][int(position[2])]["source"][
+            sentence1 = semanticData[str(position[0])][str(position[1])][int(position[2])]["source"][
                 int(position[3])]
             tempsentence[1] = sentence1
 
@@ -157,7 +161,7 @@ def triple_jsonprocess(status):
         sentences.append(tempsentence)
         triples.append(triple)
 
-    return triples
+    return triples, sentences
 
 
 def get_allns(status):

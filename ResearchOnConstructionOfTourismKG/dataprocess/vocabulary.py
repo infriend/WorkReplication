@@ -9,6 +9,7 @@ We only use =.
 import re
 import dataprocess.ltpprocess
 import dataprocess.readdata
+import numpy as np
 
 negativewords_sample = []
 with open("../data/negatives/negatives01.txt", 'r') as f:
@@ -106,20 +107,67 @@ def search_syn(word):
 
     return set(wordlist)
 
+def select_ns(sentences):
+    seg_list, pos_list = dataprocess.ltpprocess.ltp_process(sentences)
+    fin_seg = []
+    fin_pos = []
+    for i in range(len(seg_list)):
+        for j in range(len(seg_list[i])):
+            if pos_list[i][j] == 'ns':
+                fin_seg.append(seg_list[i])
+                fin_pos.append(pos_list[i])
+                break
+    return fin_seg, fin_pos
+
+def word_frequency(text_dict):
+    """
+    Count the word frequency of the input data.
+    :param: dict with {id: text}
+    :return: {word: appear times(int)}
+    """
+    word_dict = {}
+    for id in text_dict:
+        text = text_dict[id]
+        sentences = dataprocess.ltpprocess.cut_sent(text)
+        seg_list, pos_list = dataprocess.ltpprocess.ltp_process(sentences)
+        for sentence in seg_list:
+            for seg in sentence:
+                if seg in word_dict:
+                    word_dict[seg] += 1
+                else:
+                    word_dict.update({seg: 1})
+
+    return word_dict
+
+"""
+text_dict = dataprocess.readdata.read_texts("train")
+word_dict = word_frequency(text_dict)
+np.save("../data/trainingdata/word_frequency_training.npy", word_dict)
+
+"""
 """ns_sentences0, ns_poses0 = dataprocess.readdata.get_allns("train")
 ns_sentences, ns_poses = dataprocess.readdata.get_allns("test")
 ns_sentences.update(ns_sentences0)
 ns_poses.update(ns_poses0)"""
 
-import numpy as np
-ns_sentences = np.load('all_ns_sentences.npy', allow_pickle=True).item()
-ns_poses = np.load('all_ns_poses.npy', allow_pickle=True).item()
+"""
+triples, sentences = dataprocess.readdata.read_triple("train")
+t1, t2 = dataprocess.readdata.read_triple("test")
+sentences += t2
+s = set()
+for l in sentences:
+    if l[0] != 0:
+        s.add(l[0])
+    if l[1] != 0:
+        s.add(l[1])
 
-for textid in ns_sentences:
-    words = at_vocabulary(ns_sentences[textid], ns_poses[textid])
+sentences = list(s)
+sentences = set(sentences)
+ns_sentences, ns_poses = select_ns(list(sentences))
+
+words = at_vocabulary(ns_sentences, ns_poses)
 res = set(words)
-print("a")
-
+"""
 
 
 """

@@ -145,10 +145,13 @@ word_dict = word_frequency(text_dict)
 np.save("../data/trainingdata/word_frequency_training.npy", word_dict)
 
 """
+
+
 """ns_sentences0, ns_poses0 = dataprocess.readdata.get_allns("train")
 ns_sentences, ns_poses = dataprocess.readdata.get_allns("test")
 ns_sentences.update(ns_sentences0)
-ns_poses.update(ns_poses0)"""
+ns_poses.update(ns_poses0)
+print("S")"""
 
 """
 triples, sentences = dataprocess.readdata.read_triple("train")

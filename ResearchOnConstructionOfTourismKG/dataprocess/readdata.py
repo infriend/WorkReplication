@@ -92,7 +92,6 @@ def text_jsonprocess(textnum):
 
     return text
 
-
 def triple_jsonprocess(status):
     """
     Read triples first, then read the text from id, if id is different from the next triple, read new text.
@@ -100,11 +99,9 @@ def triple_jsonprocess(status):
     :return triples, sentences:
     """
     tripledict = {}
+    sentencedict = {}
 
     textid = ""
-
-    triples = []
-    sentences = []
 
     if status == "train":
         with open("../data/trainingdata/youji_train" + ".json", "r") as f:
@@ -139,6 +136,8 @@ def triple_jsonprocess(status):
                 text = f.read()
                 f.close()
                 semanticData = json.loads(text)
+            tripledict.update({textid: []})
+            sentencedict.update({textid: []})
 
         tempsentence = [0, 0]
 
@@ -158,10 +157,10 @@ def triple_jsonprocess(status):
             tempsentence[1] = sentence1
 
         # with the same index
-        sentences.append(tempsentence)
-        triples.append(triple)
+        sentencedict[textid].append(tempsentence)
+        tripledict[textid].append(triple)
 
-    return triples, sentences
+    return tripledict, sentencedict
 
 
 def get_allns(status):

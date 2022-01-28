@@ -25,17 +25,18 @@ def construct_wordfield():
     """
     F = {}
 
-    triples, sentences = readdata.read_triple()
+    triplesdict, sentencesdict = readdata.read_triple()
 
-    for city in triples:
-        for t in city:
-            if t[0] not in F:
-                if re.search("[0-9]", t[0]):
-                    F.update({t[0], 0.5})
-                elif len(t[0]) == 1 and is_chinese(t[0]):
-                    F.update({t[0], 1})
-                else:
-                    F.update({t[0], 2})
+    for index in triplesdict:
+        for city in triplesdict[index]:
+            for t in city:
+                if t[0] not in F:
+                    if re.search("[0-9]", t[0]):
+                        F.update({t[0], 0.5})
+                    elif len(t[0]) == 1 and is_chinese(t[0]):
+                        F.update({t[0], 1})
+                    else:
+                        F.update({t[0], 2})
 
     with open(synonymsPath, 'r') as f:
         text = f.read()

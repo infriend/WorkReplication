@@ -12,8 +12,8 @@ def datalabeling():
     Compare the triple entity with all ns sentence, sentences have entity as 1, else as 0
     :return: X: Sentences, Y: Labels
     """
-    all_ns_sentences = np.load("./all_ns_sentences.npy", allow_pickle=True).item()
-    all_pos = np.load("./all_ns_poses.npy", allow_pickle=True).item()
+    all_ns_sentences = np.load("./dataprocess/all_ns_sentences.npy", allow_pickle=True).item()
+    all_pos = np.load("./dataprocess/all_ns_poses.npy", allow_pickle=True).item()
     triples_dict, triple_sentences = dataprocess.readdata.read_triple("train")
 
     combinedSentence = {}
@@ -24,7 +24,6 @@ def datalabeling():
     Y_label = {}
 
     for index in triples_dict:
-        print("Text %d" % index)
         entities = []
         X_Sentences.update({index: []})
         X_Poses.update({index: []})
@@ -87,6 +86,4 @@ def datalabeling():
                         negtivetime += 1
                         Y_label[index].append(0)
 
-    return X_Sentences, Y_label
-
-datalabeling()
+    return X_Sentences, X_Poses, Y_label

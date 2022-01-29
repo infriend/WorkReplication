@@ -1,12 +1,11 @@
 from dataprocess import readdata
 import re
+import numpy as np
 """
 Read the triples, put the relation and its synonyms, values(first entity) into the field,
 values have special ways to calculate weight.
 """
 
-tripleDataPath = "./data/tripledata/"
-synonymsPath = ''  # TODO: confirm the usage of the synonyms by LTP
 
 C_standard = 4
 W_standard = 2
@@ -25,29 +24,32 @@ def construct_wordfield():
     """
     F = {}
 
-    triplesdict, sentencesdict = readdata.read_triple()
+    triplesdict, sentencesdict = readdata.read_triple("train")
 
     for index in triplesdict:
-        for city in triplesdict[index]:
-            for t in city:
-                if t[0] not in F:
-                    if re.search("[0-9]", t[0]):
-                        F.update({t[0], 0.5})
-                    elif len(t[0]) == 1 and is_chinese(t[0]):
-                        F.update({t[0], 1})
-                    else:
-                        F.update({t[0], 2})
+        for t in triplesdict[index]:
+            if t[0] not in F:
+                # pure number
+                if re.search("[0-9]", t[0]):
+                    F.update({t[0]: 0.5})
+                # chinese chararcter
+                elif len(t[0]) == 1 and is_chinese(t[0]):
+                    F.update({t[0]: 1})
+                else:
+                    F.update({t[0]: 2})
 
-    with open(synonymsPath, 'r') as f:
+    with open("../data/triggers_filtered.txt", 'r') as f:
         text = f.read()
         f.close()
         synonyms = text.split('\n')  # Temporarily, we take synonyms as a file with one word in one line.
 
     for word in synonyms:
-        F.update({word, 3})  # We set all the attribute trigger words in the synonym file.
+        F.update({word: 3})  # We set all the attribute trigger words in the synonym file.
 
     return F
 
+F = construct_wordfield()
+np.save("../data/wordfield.npy", F)
 
 def extract_field(field, seg_list, pos_list, entity):
     """
@@ -80,3 +82,4 @@ def extract_field(field, seg_list, pos_list, entity):
                 triples.append(set(ca[i][j], 'at', entity))
 
     return triples
+

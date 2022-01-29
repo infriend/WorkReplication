@@ -8,9 +8,9 @@ import dataprocess.vocabulary
 # word field
 ns_sentences, ns_poses = dataprocess.readdata.get_allns("train")
 texts, testentitydict = dataprocess.readdata.read_texts("train")
-word_frequency = dataprocess.vocabulary.word_frequency()
+"""word_frequency = dataprocess.vocabulary.word_frequency(texts)
 wordfield = extractmethod.wordfield.construct_wordfield()
-np.save("./data/wordfield.npy", wordfield)
+np.save("./data/wordfield.npy", wordfield)"""
 
 # machine learning
 X_Sentences, X_Poses, Y_label = dataprocess.datalabeling.datalabeling(ns_sentences, ns_poses, "train")

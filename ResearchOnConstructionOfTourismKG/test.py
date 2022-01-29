@@ -12,14 +12,16 @@ import extractmethod.wordfield
 import extractmethod.machinelearning
 import dataprocess.datalabeling
 import numpy as np
+import time
 
+startTime = time.time()
 # Read test texts
 texts, testentitydict = dataprocess.readdata.read_texts("test")  # get texts and entities
-# ns_sentences, ns_poses = dataprocess.readdata.get_allns("test")  # get ns sentences' segs and poses
-# word_f = dataprocess.vocabulary.word_frequency(texts)
-ns_sentences = np.load("./data/testdata/test_ns_sentences.npy", allow_pickle=True).item()
+ns_sentences, ns_poses = dataprocess.readdata.get_allns("test")  # get ns sentences' segs and poses
+word_f = dataprocess.vocabulary.word_frequency(texts)
+"""ns_sentences = np.load("./data/testdata/test_ns_sentences.npy", allow_pickle=True).item()
 ns_poses = np.load("./data/testdata/test_ns_poses.npy", allow_pickle=True).item()
-word_f = np.load("./data/testdata/testwordfrequency.npy", allow_pickle=True).item()
+word_f = np.load("./data/testdata/testwordfrequency.npy", allow_pickle=True).item()"""
 wordfield = np.load("./data/wordfield.npy", allow_pickle=True).item()
 X_Sentences, X_Poses, Y_label = dataprocess.datalabeling.datalabeling(ns_sentences, ns_poses, "test")
 
@@ -34,9 +36,9 @@ for index in texts:
     triples += list(set(triple))
 
 # Machine Learning
-# X, Y = extractmethod.machinelearning.get_feature(X_Sentences, X_Poses, Y_label, word_f, wordfield)
-X = np.load("./data/testdata/test_x.npy")
-Y = np.load("./data/testdata/test_y.npy")
+X, Y = extractmethod.machinelearning.get_feature(X_Sentences, X_Poses, Y_label, word_f, wordfield)
+#X = np.load("./data/testdata/test_x.npy")
+#Y = np.load("./data/testdata/test_y.npy")
 triple = extractmethod.machinelearning.model_test(X, X_Sentences, testentitydict)
 triples += list(set(triple))
 
@@ -47,14 +49,15 @@ for t in triples:
     entity.append(t[0])
     entity.append(t[2])
 
-with open("./data/relation.txt", 'a+') as f:
+with open("data/outputdata/relation.txt", 'a+') as f:
     f.write(relation)
     f.close()
 
 entity = set(entity)
-with open("./data/entity.txt", 'a+') as f:
+with open("data/outputdata/entity.txt", 'a+') as f:
     for e in entity:
         f.write(e + '\n')
     f.close
 
-print("Finish")
+endTime = time.time()
+print(endTime-startTime)

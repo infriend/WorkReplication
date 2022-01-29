@@ -1,7 +1,7 @@
 import os
 
 def crftrain():
-    command = "crf_learn -c 4.0 ./data/trainingdata/template ./data/trainingdata/train.txt ../data/model"
+    command = "crf_learn -c 4.0 ./data/trainingdata/template ./data/trainingdata/train.txt ./data/model"
     os.system(command)
 
 
@@ -11,6 +11,4 @@ def crftest():
     info = r.readlines()
 
     return info
-
-
 

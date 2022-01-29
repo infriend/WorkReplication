@@ -4,14 +4,26 @@ input: text data
 output: get the current site name, we extract the place info and famous sites info with CRFPP,
 we only extract the 'at' relation, thus we extract the subject
 """
+import argparse
+
 import dataprocess.readdata
 import dataprocess.wordseg
 import dataprocess.datalabeling
 import dataprocess.candidate
 import crfpp
+import time
+
+def train():
+    triples, candidates = dataprocess.candidate.choose_candidate()
+    generators = dataprocess.wordseg.word_segmentation(candidates)
+    sentences = dataprocess.data_labeling(triples, generators)
+    with open("../data/trainingdata/train.txt", 'a') as f:
+        f.write(sentences)
+        f.close()
 
 
 def test():
+    startTime = time.time()
     texts, testentitydict = dataprocess.readdata.read_texts("test")
     test_text = ''
 
@@ -30,7 +42,9 @@ def test():
                     sentence += c + ' ' + split_word[1] + '\n'
             test_text += sentence
             test_text += '\n'
-
+        with open("./data/testdata/test.txt", 'w') as f:
+            f.write(test_text)
+            f.close()
         test_res = crfpp.crftest()
 
         for line in test_res:
@@ -51,15 +65,17 @@ def test():
 
         print(testentitydict[i])
 
-    with open("./data/testdata/entity.txt", 'a+') as f:
+    with open("./data/outputdata/entity.txt", 'a+') as f:
         for every in iter(values):
             f.write(every)
         f.close()
 
-    with open("./data/testdata/relation.txt", 'a+') as f:
+    with open("./data/outputdata/relation.txt", 'a+') as f:
         for every in iter(relations):
             f.write(every)
         f.close()
+    endTime = time.time()
+    print(endTime-startTime)
 
 """
     with open("./data/testdata/test.txt", 'a+') as f:
@@ -74,4 +90,10 @@ def test():
 """
 
 if __name__ == '__main__':
-    test()
+    parser = argparse.ArgumentParser(description='HeterogeneousKG')
+    parser.add_argument('--mode', required=True, default="train", help='which mode to use')
+    args = parser.parse_args()
+    if args.mode == 'train':
+        crfpp.crftrain()
+    elif args.mode == 'test':
+        test()

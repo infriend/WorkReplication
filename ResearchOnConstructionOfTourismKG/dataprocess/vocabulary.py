@@ -12,14 +12,14 @@ import dataprocess.readdata
 import numpy as np
 
 negativewords_sample = []
-with open("../data/negatives/negatives01.txt", 'r') as f:
+with open("./data/negatives/negatives01.txt", 'r') as f:
     lines = f.readlines()
     for line in lines:
         negativewords_sample.append(line.split('\n')[0])  # \n or \t
     f.close()
 
 synonyms = []
-synonymPath = '../data/synonyms.txt'
+synonymPath = './data/synonyms.txt'
 with open(synonymPath, 'r') as f:
     lines = f.readlines()
     for line in lines:

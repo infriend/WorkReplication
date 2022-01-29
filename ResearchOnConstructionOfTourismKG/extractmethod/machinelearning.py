@@ -134,5 +134,29 @@ def model_train(X, Y):
     return eclf
 
 
-def model_test():
-    return
+def model_test(X, X_Sentences, X_entity):
+    with open("./data/scaler.pkl", 'rb') as f:
+        scaler = pickle.load(f)
+        f.close()
+    X_scaled = scaler.transform(X)
+
+    with open("./data/eclf.pkl", 'rb') as f:
+        model = pickle.load(f)
+        prd_y = model.predict(X_scaled)
+        f.close()
+
+    triples = []
+    number = 0
+    for index in X_Sentences:
+        sentences = X_Sentences[index]
+        entity = X_entity[str(index)]
+        for s in sentences:
+            if prd_y[number] == 1:
+                for w in s:
+                    if w[0] == '↑':
+                        word = w.replace('↑', '')
+                        triples.append((word, 'at', entity))
+                        break
+            number += 1
+
+    return triples

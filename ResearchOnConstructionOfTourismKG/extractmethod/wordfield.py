@@ -38,7 +38,7 @@ def construct_wordfield():
                 else:
                     F.update({t[0]: 2})
 
-    with open("../data/triggers_filtered.txt", 'r') as f:
+    with open("./data/triggers_filtered.txt", 'r') as f:
         text = f.read()
         f.close()
         synonyms = text.split('\n')  # Temporarily, we take synonyms as a file with one word in one line.
@@ -47,9 +47,6 @@ def construct_wordfield():
         F.update({word: 3})  # We set all the attribute trigger words in the synonym file.
 
     return F
-
-F = construct_wordfield()
-np.save("../data/wordfield.npy", F)
 
 def extract_field(field, seg_list, pos_list, entity):
     """
@@ -70,7 +67,10 @@ def extract_field(field, seg_list, pos_list, entity):
         for w in seg_list[i]:
             if w in field:
                 ta.append(field[w])
+
         c = len(ta)
+        if c == 0:
+            continue
         w = sum(ta)/c
         if c >= C_standard and w >= W_standard:
             ca.append(seg_list[i])
@@ -78,8 +78,9 @@ def extract_field(field, seg_list, pos_list, entity):
 
     for i in range(len(ca_pos)):
         for j in range(len(ca_pos[i])):
-            if ca_pos[i][j] == 'ns' or ca_pos[i][j] == 'n':
-                triples.append(set(ca[i][j], 'at', entity))
+            if ca_pos[i][j] == 'ns':
+                e = ca[i][j].replace('↑', '')
+                triples.append((e , 'at', entity))
 
     return triples
 

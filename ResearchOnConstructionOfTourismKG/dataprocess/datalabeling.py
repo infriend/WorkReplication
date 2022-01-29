@@ -7,14 +7,15 @@ import dataprocess.ltpprocess
 import re
 import copy
 
-def datalabeling():
+def datalabeling(all_ns_sentences, all_pos, status):
     """
     Compare the triple entity with all ns sentence, sentences have entity as 1, else as 0
     :return: X: Sentences, Y: Labels
     """
-    all_ns_sentences = np.load("./dataprocess/all_ns_sentences.npy", allow_pickle=True).item()
-    all_pos = np.load("./dataprocess/all_ns_poses.npy", allow_pickle=True).item()
-    triples_dict, triple_sentences = dataprocess.readdata.read_triple("train")
+    if status == "train":
+        triples_dict, triple_sentences = dataprocess.readdata.read_triple("train")
+    else:
+        triples_dict, triple_sentences = dataprocess.readdata.read_triple("test")
 
     combinedSentence = {}
     combinedPoses = {}

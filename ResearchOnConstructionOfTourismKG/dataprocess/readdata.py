@@ -68,7 +68,7 @@ def read_texts(status):
             text = text_jsonprocess(testtext)
             texts.update({testtext: text})
 
-        return texts, testentitylist
+        return texts, testentitydict
 
 
 def text_jsonprocess(textnum):
@@ -118,8 +118,20 @@ def triple_jsonprocess(status):
             # read the corresponding json data
             jsondata = json.loads(text)
 
+    num = 0
     # for each triple data
     for j in jsondata:
+        # read text
+        if textid != j["id"]:
+            textid = j["id"]
+            print("Read Triple Text %d %d" % (textid, num))
+            with open(semanticDatapath + str(textid) + ".json", 'r') as f:
+                text = f.read()
+                f.close()
+                semanticData = json.loads(text)
+            tripledict.update({textid: []})
+            sentencedict.update({textid: []})
+
         # we only need 地点 or 城市 景点 at 地点 or 城市, cuz 著名景点，位置 only matches 'at' relation
         sub_flag = re.search("地点|城市|景点", j['sub_type'])
         obj_flag = re.search("地点|城市|景点", j['obj_type'])
@@ -128,16 +140,6 @@ def triple_jsonprocess(status):
 
         # get the triple tuple
         triple = (j['subject'], j['relation'], j['object'])
-
-        # read text
-        if textid != j["id"]:
-            textid = j["id"]
-            with open(semanticDatapath+str(textid)+".json", 'r') as f:
-                text = f.read()
-                f.close()
-                semanticData = json.loads(text)
-            tripledict.update({textid: []})
-            sentencedict.update({textid: []})
 
         tempsentence = [0, 0]
 

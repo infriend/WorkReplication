@@ -10,6 +10,7 @@ import dataprocess.readdata
 import dataprocess.wordseg
 import dataprocess.datalabeling
 import dataprocess.candidate
+import dataprocess.semiknowledge
 import crfpp
 import time
 
@@ -65,13 +66,19 @@ def test():
 
         print(testentitydict[i])
 
+        triples, entities = dataprocess.semiknowledge.semi_extract()
+
     with open("./data/outputdata/entity.txt", 'a+') as f:
         for every in iter(values):
+            f.write(every)
+        for every in iter(entities):
             f.write(every)
         f.close()
 
     with open("./data/outputdata/relation.txt", 'a+') as f:
         for every in iter(relations):
+            f.write(every)
+        for every in iter(triples):
             f.write(every)
         f.close()
     endTime = time.time()
